@@ -1,14 +1,14 @@
-import {useMemo, useState} from 'react'; // 1. Импортируем хуки
-import { useAppDispatch, useAppSelector } from "../store"; // Используем наши хуки
-import { onAdd, onDelete, setMainNews, type NewsType } from "../store/slices/newsSlice";
+import {useMemo, useState} from 'react';
+import { useAppDispatch, useAppSelector } from "../store";
+import {onAdd, onDelete, setMainNews, type NewsType, type News, onEdit} from "../store/slices/newsSlice";
 import './App.css'
 
 function App() {
     const dispatch = useAppDispatch();
-    const newsList = useAppSelector(state => state.news.news); // Читаем список новостей
+    const newsList = useAppSelector(state => state.news.news); // Read news list
 
     const [info, setInfo] = useState("");
-    const [type, setType] = useState<NewsType>("low"); // Начальное значение - строка
+    const [type, setType] = useState<NewsType>("low"); // Starter value - string
 
     const [sortMethod, setSortMethod] = useState<'time' | 'type' | 'random'>('random');
 
@@ -21,21 +21,28 @@ function App() {
     };
 
     const handleAddNews = () => {
-        if (info.trim() === "") return; // Защита от пустого ввода
+        if (info.trim() === "") return; // catch empty input
 
         dispatch(onAdd({
-            id: crypto.randomUUID(), // Генерируем уникальный ID
+            id: crypto.randomUUID(), // Generate individual ID
             info: info,
             type: type,
             time: Date.now(),
             main: false,
         }));
 
-        setInfo(""); // Очищаем поле после добавления
+        setInfo(""); // Clear input
     }
 
-    const handleNewsEdit = () => {
+    const handleNewsEdit = (item:News) => {
+        const newInfo = prompt('Enter new info:', item.info);
 
+        if(newInfo !== null && newInfo.trim() !== ''){
+            dispatch(onEdit({
+                id: item.id,
+                newInfo: newInfo,
+            }))
+        }
     }
 
     const sortedNews = useMemo(() => {
@@ -74,7 +81,7 @@ function App() {
                     className='border-2 border-white p-2 bg-transparent rounded w-1/3'
                     type="text"
                     value={info}
-                    onChange={(event) => setInfo(event.target.value)} // 2. Исправлено SetInfo -> setInfo
+                    onChange={(event) => setInfo(event.target.value)}
                     placeholder="Input new news"
                 />
 
@@ -133,7 +140,7 @@ function App() {
                                     {!item.main ? (<span>Pin</span>) : (<span>Unpin</span>)}
                                 </span>
                                 <span className="flex items-center bg-blue-600  h-full w-15 justify-center cursor-pointer"
-                                      onClick={handleNewsEdit}
+                                      onClick={() => handleNewsEdit(item)}
                                 >
                                     Edit
                                 </span>
