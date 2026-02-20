@@ -7,6 +7,8 @@ export interface News {
     id: string; // Добавим id для ключей в будущем
     info: string;
     type: NewsType;
+    time: number;
+    main: boolean;
 }
 
 interface NewsSliceState {
@@ -40,8 +42,15 @@ const newsSlice = createSlice({
         sortByType: () => {
 
         },
-        setMainNews: () => {
+        setMainNews: (state, action: PayloadAction<string>) => {
+            const item = state.news.find(n => n.id === action.payload);
 
+            if(item){
+                item.main = !item.main;
+                console.log(`${item.info} - ${item.main}`);
+            }
+
+            localStorage.setItem("user_news", JSON.stringify(state.news));
         },
         onEdit: () => {
 
@@ -49,5 +58,5 @@ const newsSlice = createSlice({
     },
 });
 
-export const { onAdd, onDelete } = newsSlice.actions;
+export const { onAdd, onDelete, setMainNews, onEdit, sortByType, sortByTime } = newsSlice.actions;
 export default newsSlice.reducer; // 4. Экспортируем именно reducer
