@@ -10,6 +10,11 @@ function App() {
     const [info, setInfo] = useState("");
     const [type, setType] = useState<NewsType>("low"); // Starter value - string
 
+    //modal
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isEditId, setIsEditId] = useState<News>();
+    const [editName, setEditName] = useState("");
+
     const [sortMethod, setSortMethod] = useState<'time' | 'type' | 'random'>('random');
 
     const handleSortNewsByTime = () => {
@@ -34,13 +39,11 @@ function App() {
         setInfo(""); // Clear input
     }
 
-    const handleNewsEdit = (item:News) => {
-        const newInfo = prompt('Enter new info:', item.info);
-
-        if(newInfo !== null && newInfo.trim() !== ''){
+    const handleNewsEdit = (item:News, value: string) => {
+        if(value !== null && value.trim() !== ''){
             dispatch(onEdit({
                 id: item.id,
-                newInfo: newInfo,
+                newInfo: value,
             }))
         }
     }
@@ -140,7 +143,7 @@ function App() {
                                     {!item.main ? (<span>Pin</span>) : (<span>Unpin</span>)}
                                 </span>
                                 <span className="flex items-center bg-blue-600  h-full w-15 justify-center cursor-pointer"
-                                      onClick={() => handleNewsEdit(item)}
+                                      onClick={() => {setIsEditId(item); setIsOpen(true); setEditName(item.info)}}
                                 >
                                     Edit
                                 </span>
@@ -154,6 +157,41 @@ function App() {
                     </div>
                 ))}
             </div>
+            {isOpen && (
+                // Фиксированный контейнер на весь экран (fixed inset-0)
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+
+                    {/* Контентное окно */}
+                    <div className="bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700 text-white">
+                        <h2 className="text-2xl font-bold mb-4">Editing news</h2>
+                        <div className="text-slate-300 mb-6">
+                            <input type={'text'} value={editName} onChange={(e) => setEditName(e.target.value as NewsType)}
+                            className='w-full border border-slate-700 rounded p-2'/>
+                        </div>
+
+                        <div className="flex gap-4 justify-end">
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="text-slate-400 hover:text-white"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (isEditId) {
+                                        handleNewsEdit(isEditId, editName);
+                                    }
+                                    setIsOpen(false);
+                                }}
+                                className="bg-blue-600 px-5 py-2 rounded-xl"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            )}
         </div>
     )
 }
